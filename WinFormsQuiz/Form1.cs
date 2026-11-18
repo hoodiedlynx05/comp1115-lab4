@@ -1,9 +1,17 @@
+using System.Windows.Forms.VisualStyles;
+
 namespace WinFormsQuiz
 {
+    public struct Questions(string question, string answer)
+    {
+        public string question = question;
+        public string answer = answer;
+    }
     public partial class Form1 : Form
     {
         // array of questions and answers
-        string[,] questions = new string[4, 2];
+
+        Questions[] questions = new Questions[6];
 
         // track current question
         int currentQuestion = 0;
@@ -18,6 +26,8 @@ namespace WinFormsQuiz
         {
             InitializeComponent();
 
+            SetTheme();
+
             // call new LoadQuestions() method to populate quiz data
             LoadQuestions();
         }
@@ -29,17 +39,15 @@ namespace WinFormsQuiz
         private void LoadQuestions()
         {
             // populate array
-            questions[0, 0] = "What's the capital of Japan?";
-            questions[0, 1] = "Tokyo";
-            questions[1, 0] = "What colour is the sky?";
-            questions[1, 1] = "Blue";
-            questions[2, 0] = "Which came first, the chicken or the egg?";
-            questions[2, 1] = "Chicken";
-            questions[3, 0] = "What day is our class?";
-            questions[3, 1] = "Monday";
+            questions[0] = new Questions("What's the capital of Japan?", "Tokyo");
+            questions[1] = new Questions("What colour is the sky?", "Blue");
+            questions[2] = new Questions("Which came first, the chicken or the egg?", "Egg");
+            questions[3] = new Questions("What day is our class?", "Monday");
+            questions[4] = new Questions("What is the longest day of the year?", "Summer Solstice");
+            questions[5] = new Questions("Which month has the least number of days?", "February");
 
             // show 1st question on question label
-            lblQuestion.Text = questions[0, 0];
+            lblQuestion.Text = questions[0].question;
         }
 
         /// <summary>
@@ -59,14 +67,19 @@ namespace WinFormsQuiz
         private void FinishQuiz()
         {
             btnSubmit.Enabled = false;
-            lblQuestion.Text = $"You got {correct} correct answers out of {questions.GetLength(0)} questions.";
+            lblQuestion.Text = $"You got {correct} correct answers out of {questions.Length} questions.\nYour percentage is {GetPercentScore(correct, questions.Length)}%";
+        }
+
+        private static int GetPercentScore(int correct, int total)
+        {
+            return (correct * 100) / total;
         }
 
         private void btnSubmit_Click(object sender, EventArgs e)
         {
             // MessageBox.Show("You clicked me");
             // if user has entered correct answer in the textbox
-            if (txtAnswer.Text == questions[currentQuestion, 1])
+            if (txtAnswer.Text.ToLower() == questions[currentQuestion].answer.ToLower())
             {
                 ShowFeedback("Correct", Color.Green);
 
@@ -75,18 +88,31 @@ namespace WinFormsQuiz
             }
             else
             {
-                // wrong answer
-                ShowFeedback("Incorrect", Color.Red);
+                if (txtAnswer.Text.Split(" ")[0].ToLower() == "the")
+                {
+                    Console.WriteLine("contains a \"the\"");
+                    string currentAnswer = string.Concat(txtAnswer.Text.Split(" ")[1..^0]);
+                    if (currentAnswer.ToLower() == questions[currentQuestion].answer.ToLower())
+                    {
+                        ShowFeedback("Correct", Color.Green);
+                        correct++;
+                    }
+                }
+                else
+                {
+                    // wrong answer
+                    ShowFeedback("Incorrect", Color.Red);
+                }
             }
 
             // increment current question 
             currentQuestion++;
 
             // are there more questions?
-            if (currentQuestion < questions.GetLength(0))
+            if (currentQuestion < questions.Length)
             {
                 //  move to next question                
-                lblQuestion.Text = questions[currentQuestion, 0];
+                lblQuestion.Text = questions[currentQuestion].question;
             }
             else
             {
@@ -97,20 +123,31 @@ namespace WinFormsQuiz
             // clear last answer
             txtAnswer.Text = "";
         }
-
-        private void btnRestart_Click(object sender, EventArgs e)
+        private void Restart()
         {
             currentQuestion = 0;
             correct = 0;
             lblMessage.Text = "Restarting the Quiz";
-            lblMessage.ForeColor = Color.Black;
-            lblQuestion.Text = questions[0, 0];
+            if (isDark)
+            {
+                lblMessage.ForeColor = Color.Black;
+            }
+            else
+            {
+                lblMessage.ForeColor = Color.White;
+            }
+            lblQuestion.Text = questions[0].question;
             btnSubmit.Enabled = true;
         }
 
-        private void btnToggleTheme_Click(object sender, EventArgs e)
+        private void btnRestart_Click(object sender, EventArgs e)
         {
-            if (isDark == true)
+            Restart();
+        }
+
+        private void SetTheme()
+        {
+            if (isDark)
             {
                 this.BackColor = Color.Black;
                 lblMessage.ForeColor = Color.White;
@@ -124,18 +161,21 @@ namespace WinFormsQuiz
             }
             else
             {
-                {
-                    this.BackColor = Color.White;
-                    lblMessage.ForeColor = Color.Black;
-                    lblQuestion.ForeColor = Color.Black;
-                    txtAnswer.ForeColor = Color.Black;
-                    //btnSubmit.ForeColor = Color.White;
-                    //btnRestart.ForeColor = Color.White;
-                    //btnToggleTheme.ForeColor = Color.White;
-                    txtAnswer.BackColor = Color.DimGray;
-                    isDark = true;
-                }
+                this.BackColor = Color.White;
+                lblMessage.ForeColor = Color.Black;
+                lblQuestion.ForeColor = Color.Black;
+                txtAnswer.ForeColor = Color.Black;
+                //btnSubmit.ForeColor = Color.White;
+                //btnRestart.ForeColor = Color.White;
+                //btnToggleTheme.ForeColor = Color.White;
+                txtAnswer.BackColor = Color.DimGray;
+                isDark = true;
             }
+        }
+
+        private void btnToggleTheme_Click(object sender, EventArgs e)
+        {
+            SetTheme();
         }
     }
 }
