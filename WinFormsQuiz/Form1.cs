@@ -67,12 +67,20 @@ namespace WinFormsQuiz
         private void FinishQuiz()
         {
             btnSubmit.Enabled = false;
-            lblQuestion.Text = $"You got {correct} correct answers out of {questions.Length} questions.\nYour percentage is {GetPercentScore(correct, questions.Length)}%";
+            int percent = GetPercentScore(correct, questions.Length);
+            lblQuestion.Text = $"Score: {correct}/{questions.Length} - {percent}%\nGrade: {GetGrade(percent)}";
         }
-
         private static int GetPercentScore(int correct, int total)
         {
             return (correct * 100) / total;
+        }
+        private static string GetGrade(int percent)
+        {
+            if (percent >= 90) return "A";
+            if (percent >= 80) return "B";
+            if (percent >= 70) return "C";
+            if (percent >= 60) return "D";
+            return "F";
         }
 
         private void btnSubmit_Click(object sender, EventArgs e)
