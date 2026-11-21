@@ -70,10 +70,22 @@ namespace WinFormsQuiz
             int percent = GetPercentScore(correct, questions.Length);
             lblQuestion.Text = $"Score: {correct}/{questions.Length} - {percent}%\nGrade: {GetGrade(percent)}";
         }
+        /// <summary>
+        /// Takes in the number of correct answers along with the number of questions, and returns the percentage as an integer
+        /// </summary>
+        /// <param name="correct"></param>
+        /// <param name="total"></param>
+        /// <returns></returns>
         private static int GetPercentScore(int correct, int total)
         {
             return (correct * 100) / total;
         }
+        
+        /// <summary>
+        /// Takes in the percentage and returns the letter grade
+        /// </summary>
+        /// <param name="percent"></param>
+        /// <returns></returns>
         private static string GetGrade(int percent)
         {
             if (percent >= 90) return "A";
