@@ -12,6 +12,9 @@ namespace WinFormsQuiz
         // array of questions and answers
 
         Questions[] questions = new Questions[6];
+        Questions[] allQuestions = new Questions[6];
+
+        int numQuestions;
 
         // track current question
         int currentQuestion = 0;
@@ -20,6 +23,7 @@ namespace WinFormsQuiz
         int correct = 0;
 
         bool isDark = false;
+        bool isQuizLengthQuestion = true;
 
         // startup method that runs automatically when this form loads
         public Form1()
@@ -29,7 +33,14 @@ namespace WinFormsQuiz
             SetTheme();
 
             // call new LoadQuestions() method to populate quiz data
-            LoadQuestions();
+            GetNumQuestions();
+        }
+
+        private void GetNumQuestions()
+        {
+
+            isQuizLengthQuestion = true;
+            lblQuestion.Text = "how many questions do you want to do";
         }
 
         /// <summary>
@@ -39,12 +50,14 @@ namespace WinFormsQuiz
         private void LoadQuestions()
         {
             // populate array
-            questions[0] = new Questions("What's the capital of Japan?", "Tokyo");
-            questions[1] = new Questions("What colour is the sky?", "Blue");
-            questions[2] = new Questions("Which came first, the chicken or the egg?", "Egg");
-            questions[3] = new Questions("What day is our class?", "Monday");
-            questions[4] = new Questions("What is the longest day of the year?", "Summer Solstice");
-            questions[5] = new Questions("Which month has the least number of days?", "February");
+            allQuestions[0] = new Questions("What's the capital of Japan?", "Tokyo");
+            allQuestions[1] = new Questions("What colour is the sky?", "Blue");
+            allQuestions[2] = new Questions("Which came first, the chicken or the egg?", "Egg");
+            allQuestions[3] = new Questions("What day is our class?", "Monday");
+            allQuestions[4] = new Questions("What is the longest day of the year?", "Summer Solstice");
+            allQuestions[5] = new Questions("Which month has the least number of days?", "February");
+
+            questions = allQuestions[0..numQuestions];
 
             // show 1st question on question label
             lblQuestion.Text = questions[0].question;
@@ -80,7 +93,7 @@ namespace WinFormsQuiz
         {
             return (correct * 100) / total;
         }
-        
+
         /// <summary>
         /// Takes in the percentage and returns the letter grade
         /// </summary>
@@ -97,6 +110,36 @@ namespace WinFormsQuiz
 
         private void btnSubmit_Click(object sender, EventArgs e)
         {
+            if (isQuizLengthQuestion)
+            {
+                try
+                {
+                    numQuestions = int.Parse(txtAnswer.Text);
+                    if (numQuestions > questions.Length)
+                    {
+                        lblQuestion.Text = "that number is too large";
+                        txtAnswer.Text = "";
+                        return;
+                    }
+                    if (numQuestions < 1)
+                    {
+                        lblQuestion.Text = "that number is too small";
+                        txtAnswer.Text = "";
+                        return;
+                    }
+                    isQuizLengthQuestion = false;
+                    txtAnswer.Text = "";
+
+                    LoadQuestions();
+                    return;
+                }
+                catch
+                {
+                    lblQuestion.Text = "that isn't a number";
+                    txtAnswer.Text = "";
+                    return;
+                }
+            }
             // MessageBox.Show("You clicked me");
             // if user has entered correct answer in the textbox
             if (txtAnswer.Text.ToLower() == questions[currentQuestion].answer.ToLower())
@@ -147,6 +190,7 @@ namespace WinFormsQuiz
         {
             currentQuestion = 0;
             correct = 0;
+
             lblMessage.Text = "Restarting the Quiz";
             if (isDark)
             {
@@ -156,7 +200,8 @@ namespace WinFormsQuiz
             {
                 lblMessage.ForeColor = Color.White;
             }
-            lblQuestion.Text = questions[0].question;
+
+            GetNumQuestions();
             btnSubmit.Enabled = true;
         }
 
